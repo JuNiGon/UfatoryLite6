@@ -1,0 +1,62 @@
+<!--
+  Célula de aplicação de selante em PCB com o UFactory Lite 6.
+
+  Este arquivo fica DENTRO de mujoco_menagerie/ufactory_lite6/ (substitui o scene.xml
+  original), ao lado de lite6.xml e da pasta assets/, para os meshes do robô serem achados.
+
+  Unidades: metros. Eixo z para cima. Base do robô na origem, olhando para +x.
+-->
+<mujoco model="celula_pcb_lite6">
+  <include file="lite6.xml"/>
+
+  <statistic center="0.2 0 0.15" extent="0.9"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <global azimuth="140" elevation="-25"/>
+  </visual>
+
+  <asset>
+    <texture name="ceu" type="skybox" builtin="gradient" rgb1="0.35 0.5 0.65" rgb2="0 0 0"
+             width="512" height="3072"/>
+    <texture name="piso_tex" type="2d" builtin="checker" rgb1="0.20 0.22 0.24" rgb2="0.27 0.29 0.31"
+             width="300" height="300"/>
+    <material name="piso"     texture="piso_tex" texrepeat="6 6" texuniform="true"/>
+    <material name="bancada"  rgba="0.78 0.80 0.83 1"/>
+    <material name="aco"      rgba="0.42 0.44 0.48 1"/>
+    <material name="preto"    rgba="0.10 0.10 0.12 1"/>
+    <material name="pcb"      rgba="0.04 0.40 0.18 1"/>
+    <material name="selante"  rgba="1.0 0.45 0.05 1"/>
+    <material name="bandeja"  rgba="0.25 0.45 0.75 1"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0.4 -0.6 1.6" dir="-0.2 0.4 -1"/>
+
+    <!-- Piso -->
+    <geom name="piso" type="plane" size="3 3 0.05" pos="0 0 -0.78" material="piso"/>
+
+    <!-- Bancada: tampo (topo em z = -0.003) e 4 pernas -->
+    <geom name="tampo"   type="box" pos="0.2 0 -0.013"         size="0.6 0.5 0.01"        material="bancada"/>
+    <geom name="perna_1" type="box" pos="-0.35 -0.45 -0.4015"  size="0.025 0.025 0.3785"  material="aco"/>
+    <geom name="perna_2" type="box" pos="-0.35  0.45 -0.4015"  size="0.025 0.025 0.3785"  material="aco"/>
+    <geom name="perna_3" type="box" pos="0.75  -0.45 -0.4015"  size="0.025 0.025 0.3785"  material="aco"/>
+    <geom name="perna_4" type="box" pos="0.75   0.45 -0.4015"  size="0.025 0.025 0.3785"  material="aco"/>
+
+    <!-- Estação da PCB, centrada em (0.26, 0) na frente do robô -->
+    <geom name="gabarito" type="box" pos="0.26 0 0.0005"  size="0.075 0.055 0.0035" material="preto"/>
+    <geom name="placa"    type="box" pos="0.26 0 0.0048"  size="0.05 0.035 0.0008"  material="pcb"/>
+    <geom name="chip_1"   type="box" pos="0.245 -0.010 0.0072" size="0.010 0.010 0.0016" material="preto"/>
+    <geom name="chip_2"   type="box" pos="0.278  0.008 0.0072" size="0.008 0.006 0.0016" material="preto"/>
+
+    <!-- Trilha de selante (retângulo 60 x 40 mm) -->
+    <geom name="selante_n" type="box" pos="0.26  0.02 0.00575" size="0.03 0.0006 0.00015" material="selante"/>
+    <geom name="selante_s" type="box" pos="0.26 -0.02 0.00575" size="0.03 0.0006 0.00015" material="selante"/>
+    <geom name="selante_l" type="box" pos="0.29  0    0.00575" size="0.0006 0.02 0.00015" material="selante"/>
+    <geom name="selante_o" type="box" pos="0.23  0    0.00575" size="0.0006 0.02 0.00015" material="selante"/>
+
+    <!-- Bandeja de placas e caixa da controladora -->
+    <geom name="bandeja"      type="box" pos="0.58 -0.27 0.001" size="0.09 0.06 0.004" material="bandeja"/>
+    <geom name="controladora" type="box" pos="-0.33 -0.36 0.03" size="0.08 0.10 0.033" material="aco"/>
+  </worldbody>
+</mujoco>
