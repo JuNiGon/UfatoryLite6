@@ -1,17 +1,21 @@
 # Simulação do UFactory Lite 6 no MuJoCo: célula de selante em PCB
 
 Simulação de um braço robótico **UFactory Lite 6** (6 graus de liberdade) em uma bancada de
-laboratório onde o robô aplica selante em uma placa de circuito impresso (PCB).
+montagem eletrônica, onde o robô aplica selante em uma placa de circuito impresso (PCB).
 
-O script move cada junta individualmente, mostrando sua faixa de movimento. Depois faz um
-movimento coordenado da pose de repouso até logo acima da PCB.
+O script:
+
+1. move cada junta individualmente, mostrando sua faixa de movimento;
+2. faz um movimento coordenado em que o robô sai do repouso, desce sobre a PCB, percorre os
+   4 cantos da trilha de selante e volta ao repouso.
 
 | Item | Valor |
 |---|---|
-| Simulador | MuJoCo (biblioteca Python `mujoco`) |
+| Simulador | MuJoCo 3.3 ou mais recente (biblioteca Python `mujoco`) |
+| Linguagem | Python 3.11 |
 | Robô | UFactory Lite 6, modelo do [MuJoCo Menagerie](https://github.com/google-deepmind/mujoco_menagerie/tree/main/ufactory_lite6) |
-| Linguagem | Python 3.9 ou mais recente |
 | Sistemas | Windows, Linux e macOS |
+| Vídeo | [Simulação rodando (Google Drive)](https://drive.google.com/file/d/1V2ehtKp4JgyYJ_5_L4XqeUZYM9Il-e67/view?usp=sharing) |
 
 ---
 
@@ -19,83 +23,80 @@ movimento coordenado da pose de repouso até logo acima da PCB.
 
 ```
 projeto/
-├── robo.py                  <- script principal
+├── robo.py              <- script principal
+├── requirements.txt     <- dependência (mujoco)
 ├── README.md
-└── ufactory_lite6/          <- pasta copiada do MuJoCo Menagerie
-    ├── lite6.xml            <- modelo do robô (original do Menagerie)
-    ├── scene.xml            <- NOSSA cena (substitui o scene.xml original)
-    └── assets/              <- malhas 3D do robô
+└── ufactory_lite6/      <- pasta do MuJoCo Menagerie
+    ├── lite6.xml        <- modelo do robô (original do Menagerie)
+    ├── scene.xml        <- cena da célula (bancada, PCB, bandeja, controladora)
+    └── assets/          <- malhas 3D do robô
 ```
 
-> O `scene.xml` precisa ficar **dentro** de `ufactory_lite6/`, ao lado de `lite6.xml`.
-> O modelo procura as malhas na pasta `assets/` a partir da pasta do arquivo de cena.
+O `scene.xml` precisa ficar **dentro** de `ufactory_lite6/`, ao lado de `lite6.xml`, porque o
+modelo procura as malhas na pasta `assets/` a partir da pasta do arquivo de cena.
 
 ---
 
 ## Instalação
 
-### 1. Instalar o MuJoCo
+1. Instale o Python 3.11 (ou mais recente).
+2. Na pasta do projeto, instale o MuJoCo:
 
-```bash
-pip install mujoco
-```
+   ```bash
+   py -3.11 -m pip install -r requirements.txt
+   ```
 
-Para conferir a versão instalada (anote-a na tabela acima):
+   No Linux ou macOS, use `python3 -m pip install -r requirements.txt`.
 
-```bash
-python -c "import mujoco; print(mujoco.__version__)"
-```
+3. Confira a instalação:
 
-### 2. Baixar o modelo do robô
+   ```bash
+   py -3.11 -c "import mujoco; print(mujoco.__version__)"
+   ```
 
-Opção A, com Git:
-
-```bash
-git clone https://github.com/google-deepmind/mujoco_menagerie.git
-```
-
-Opção B, sem Git: no GitHub do Menagerie, clique em **Code > Download ZIP** e extraia o arquivo.
-
-### 3. Montar a pasta do projeto
-
-1. Copie a pasta `mujoco_menagerie/ufactory_lite6/` para dentro da pasta do projeto.
-2. Coloque o nosso `scene.xml` dentro de `ufactory_lite6/` e substitua o original.
-3. Deixe o `robo.py` na pasta do projeto, ao lado de `ufactory_lite6/`.
+A pasta `ufactory_lite6/` já vem no projeto com a cena e os modelos. Não é preciso baixar o
+Menagerie separadamente.
 
 ---
 
 ## Como rodar
 
-Abra o terminal **na pasta do projeto** e rode:
-
 | Sistema | Comando |
 |---|---|
-| Windows / Linux | `python robo.py` |
-| macOS | `mjpython robo.py` (o visualizador do MuJoCo exige o `mjpython` no Mac) |
+| Windows | `py -3.11 robo.py` |
+| Linux | `python3 robo.py` |
+| macOS | `mjpython robo.py` (no Mac, o visualizador do MuJoCo exige o `mjpython`) |
 
-A janela do MuJoCo abre e a sequência começa sozinha (cerca de 1 min e 20 s):
+A janela do MuJoCo abre já enquadrando o robô e a PCB, e a sequência começa sozinha:
 
-1. 2 s parado na pose de repouso.
-2. Juntas 1 a 6, uma de cada vez: vai ao mínimo, depois ao máximo, e volta ao repouso.
-   O terminal mostra o limite real de cada junta e a faixa que está sendo varrida.
-3. Movimento coordenado até ficar acima da PCB, 2 s de pausa e volta ao repouso.
-4. A janela fica aberta até você fechá-la.
+| Etapa | Duração aprox. | O que acontece |
+|---|---|---|
+| Repouso | 3 s | Robô parado na pose inicial |
+| Juntas 1 a 6 | 65 s | Cada junta vai ao mínimo, depois ao máximo, e volta ao repouso |
+| Movimento coordenado | 15 s | Aproximação, contorno dos 4 cantos da trilha de selante, afastamento e repouso |
 
-Dicas do visualizador: arraste com o botão esquerdo para girar a câmera, use o scroll para dar
-zoom e clique duas vezes em uma peça para centralizar nela.
+O terminal mostra os limites de cada junta e a posição do flange (em mm) a cada ponto do
+contorno. A janela fica aberta até ser fechada.
+
+**Controles do visualizador:**
+
+- arrastar com o botão esquerdo: girar a câmera;
+- scroll: zoom;
+- duplo clique em uma peça: centralizar nela;
+- `Tab` / `Shift+Tab`: mostrar ou esconder os painéis laterais.
 
 ### Problemas comuns
 
-| Erro | Causa e solução |
+| Erro | Solução |
 |---|---|
-| `ValueError` dizendo que não abriu `ufactory_lite6/scene.xml` | O terminal não está na pasta do projeto. Use `cd` até a pasta onde está o `robo.py`. |
-| Erro de malha (`.stl`) não encontrada | O `scene.xml` está fora da pasta `ufactory_lite6/`. |
+| `ModuleNotFoundError: No module named 'mujoco'` | Instale com o mesmo Python que roda o script: `py -3.11 -m pip install mujoco`. |
+| Erro dizendo que não encontrou `scene.xml` ou um arquivo `.stl` | Confira se a pasta `ufactory_lite6/` está ao lado do `robo.py` e se o `scene.xml` está dentro dela. |
+| `TypeError` em `launch_passive` | Versão antiga do MuJoCo. Atualize com `py -3.11 -m pip install -U mujoco`. |
 | macOS: erro pedindo para rodar com `mjpython` | Rode com `mjpython robo.py`. |
-| `ModuleNotFoundError: No module named 'mujoco'` | Rode `pip install mujoco` no mesmo Python que executa o script. |
 
 ---
 
-## Sobre o robô
+## O robô
 
 | Junta | Função | Tipo | Limite real | Faixa usada na demo |
 |---|---|---|---|---|
@@ -106,23 +107,25 @@ zoom e clique duas vezes em uma peça para centralizar nela.
 | 5 | Punho (flexão) | R | -124° a +124° | -90° a +90° |
 | 6 | Flange (giro da ferramenta) | R | -360° a +360° | -360° a +360° |
 
-São 6 graus de liberdade, todos de juntas rotativas (configuração 6R). O alcance é de cerca de 440 mm.
+- **6 graus de liberdade**, todos de juntas rotativas (configuração **6R**).
+- Alcance de cerca de **440 mm**.
+- **Faixas reduzidas nas juntas 2, 3 e 5:** perto do limite real, o braço colide com ele mesmo
+  (antebraço contra o braço ou a base) ou com a bancada. As faixas da demo foram verificadas
+  no MuJoCo sem nenhum contato entre peças, com cerca de 5° de margem.
 
-**Por que a faixa usada é menor nas juntas 2, 3 e 5:** perto do limite real, o braço colide com
-ele mesmo (antebraço contra o braço ou a base) ou com a bancada. As faixas da demo foram
-escolhidas checando colisões no próprio MuJoCo, com uma margem de cerca de 5°.
+## Como o movimento é feito
 
----
+- As poses são listas com os 6 ângulos de junta, em radianos. O movimento é feito escrevendo
+  diretamente em `data.qpos` (e em `data.ctrl`, o alvo dos servos do modelo), sem cinemática
+  inversa.
+- Entre duas poses, todas as juntas são interpoladas ao mesmo tempo com uma curva suave
+  (*smoothstep*), de modo que o movimento começa e termina devagar.
+- As poses dos cantos da PCB foram obtidas por cinemática direta. Nos cantos, a junta 5 vale
+  (junta 3 − junta 2), o que mantém o flange apontando para baixo.
 
-## Uso de IA
+## Cenário (`scene.xml`)
 
-> Complete esta seção com a sua experiência. Os itens abaixo são um ponto de partida.
-
-- **Ferramentas usadas:** Claude (Anthropic) para montar a cena, simplificar o script, achar
-  ângulos de junta sem cinemática inversa e escrever este README.
-- **Onde ajudou:** calculou uma pose de juntas que deixa a ferramenta logo acima da PCB usando
-  só cinemática direta, e explicou por que é preciso escrever em `data.ctrl` além de
-  `data.qpos` (os servos de posição do modelo puxariam o braço de volta).
-- **Onde errou:** a primeira versão varria as juntas a partir da pose dobrada (todas as juntas
-  em zero) e usava o limite completo. Ao rodar, as juntas 2, 3 e 4 atravessavam outras partes
-  do robô. A correção foi mudar a pose de partida e limitar a faixa de varredura.
+- Bancada com tampo e quatro pernas, sobre o piso do laboratório.
+- Gabarito preto com uma PCB de 100 × 70 mm, chips e uma trilha de selante (retângulo laranja
+  de 60 × 40 mm) na frente do robô.
+- Bandeja de placas e caixa da controladora ao redor do robô.
