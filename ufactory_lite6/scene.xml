@@ -1,10 +1,13 @@
 <!--
   Célula de aplicação de selante em PCB com o UFactory Lite 6.
 
-  Este arquivo fica DENTRO de mujoco_menagerie/ufactory_lite6/ (substitui o scene.xml
-  original), ao lado de lite6.xml e da pasta assets/, para os meshes do robô serem achados.
+  Este arquivo fica DENTRO de ufactory_lite6/ (substitui o scene.xml original do
+  Menagerie), ao lado de lite6.xml e da pasta assets/, para os meshes do robô serem achados.
 
   Unidades: metros. Eixo z para cima. Base do robô na origem, olhando para +x.
+  Ambiente: canto de um laboratório de montagem eletrônica (paredes atrás e à esquerda
+  do robô, para não tapar a câmera inicial, que fica à frente e à direita).
+  Todos os objetos de fundo são só visuais (contype="0" conaffinity="0"): não colidem.
 -->
 <mujoco model="celula_pcb_lite6">
   <include file="lite6.xml"/>
@@ -12,30 +15,54 @@
   <statistic center="0.2 0 0.15" extent="0.9"/>
 
   <visual>
-    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <headlight diffuse="0.45 0.45 0.45" ambient="0.30 0.30 0.30" specular="0 0 0"/>
     <global azimuth="140" elevation="-25"/>
+    <quality shadowsize="4096"/>
   </visual>
 
   <asset>
-    <texture name="ceu" type="skybox" builtin="gradient" rgb1="0.35 0.5 0.65" rgb2="0 0 0"
+    <!-- Fundo: cinza claro de ambiente interno (no lugar do céu azul) -->
+    <texture name="ceu" type="skybox" builtin="gradient" rgb1="0.82 0.84 0.86" rgb2="0.55 0.57 0.60"
              width="512" height="3072"/>
-    <texture name="piso_tex" type="2d" builtin="checker" rgb1="0.20 0.22 0.24" rgb2="0.27 0.29 0.31"
-             width="300" height="300"/>
-    <material name="piso"     texture="piso_tex" texrepeat="6 6" texuniform="true"/>
-    <material name="bancada"  rgba="0.78 0.80 0.83 1"/>
-    <material name="aco"      rgba="0.42 0.44 0.48 1"/>
-    <material name="preto"    rgba="0.10 0.10 0.12 1"/>
-    <material name="pcb"      rgba="0.04 0.40 0.18 1"/>
-    <material name="selante"  rgba="1.0 0.45 0.05 1"/>
-    <material name="bandeja"  rgba="0.25 0.45 0.75 1"/>
+    <!-- Piso de epóxi industrial cinza-esverdeado, em placas -->
+    <texture name="piso_tex" type="2d" builtin="checker" rgb1="0.36 0.42 0.40" rgb2="0.33 0.39 0.37"
+             width="300" height="300" mark="edge" markrgb="0.28 0.33 0.31"/>
+    <material name="piso" texture="piso_tex" texrepeat="8 8" texuniform="true" reflectance="0.05"/>
+
+    <!-- Materiais da célula (bancada, PCB e equipamentos: iguais aos de antes) -->
+    <material name="bancada" rgba="0.78 0.80 0.83 1"/>
+    <material name="aco"     rgba="0.42 0.44 0.48 1"/>
+    <material name="preto"   rgba="0.10 0.10 0.12 1"/>
+    <material name="pcb"     rgba="0.04 0.40 0.18 1"/>
+    <material name="selante" rgba="1.0 0.45 0.05 1"/>
+    <material name="bandeja" rgba="0.25 0.45 0.75 1"/>
+
+    <!-- Materiais do ambiente -->
+    <material name="parede"     rgba="0.88 0.89 0.90 1"/>
+    <material name="rodape"     rgba="0.30 0.34 0.38 1"/>
+    <material name="faixa_seg"  rgba="0.95 0.78 0.10 1"/>
+    <material name="estante"    rgba="0.20 0.35 0.60 1"/>
+    <material name="prateleira" rgba="0.70 0.72 0.75 1"/>
+    <material name="caixa_az"   rgba="0.20 0.45 0.80 1"/>
+    <material name="caixa_cz"   rgba="0.55 0.57 0.60 1"/>
+    <material name="caixa_pp"   rgba="0.72 0.60 0.42 1"/>
+    <material name="armario"    rgba="0.70 0.12 0.10 1"/>
+    <material name="extintor"   rgba="0.85 0.08 0.08 1"/>
+    <material name="quadro"     rgba="0.97 0.97 0.97 1"/>
+    <material name="moldura"    rgba="0.25 0.25 0.28 1"/>
+    <material name="placa_aviso" rgba="0.98 0.80 0.05 1"/>
   </asset>
 
   <worldbody>
-    <light pos="0.4 -0.6 1.6" dir="-0.2 0.4 -1"/>
+    <!-- Iluminação de laboratório: duas luminárias de teto + luz de preenchimento -->
+    <light name="teto_1" pos="0.2 -0.4 1.9" dir="0 0.2 -1" diffuse="0.55 0.55 0.55" castshadow="true"/>
+    <light name="teto_2" pos="-0.6 0.6 1.9" dir="0.2 -0.2 -1" diffuse="0.35 0.35 0.35" castshadow="false"/>
+    <light name="preench" pos="1.5 -1.2 1.0" dir="-1 0.8 -0.4" diffuse="0.20 0.20 0.20" castshadow="false"/>
 
     <!-- Piso -->
-    <geom name="piso" type="plane" size="3 3 0.05" pos="0 0 -0.78" material="piso"/>
+    <geom name="piso" type="plane" size="4 4 0.05" pos="0 0 -0.78" material="piso"/>
 
+    <!-- ===================== CÉLULA (sem alterações) ===================== -->
     <!-- Bancada: tampo (topo em z = -0.003) e 4 pernas -->
     <geom name="tampo"   type="box" pos="0.2 0 -0.013"         size="0.6 0.5 0.01"        material="bancada"/>
     <geom name="perna_1" type="box" pos="-0.35 -0.45 -0.4015"  size="0.025 0.025 0.3785"  material="aco"/>
@@ -58,5 +85,81 @@
     <!-- Bandeja de placas e caixa da controladora -->
     <geom name="bandeja"      type="box" pos="0.58 -0.27 0.001" size="0.09 0.06 0.004" material="bandeja"/>
     <geom name="controladora" type="box" pos="-0.33 -0.36 0.03" size="0.08 0.10 0.033" material="aco"/>
+
+    <!-- ===================== AMBIENTE (fundo, só visual) ===================== -->
+    <body name="ambiente">
+      <!-- Paredes: atrás do robô (x = -1.6) e à esquerda (y = +1.6). Pé-direito de 2,6 m -->
+      <geom name="parede_fundo"    type="box" pos="-1.62 0.0 0.52"  size="0.02 1.62 1.30" material="parede"
+            contype="0" conaffinity="0"/>
+      <geom name="parede_esquerda" type="box" pos="0.6 1.62 0.52"   size="2.2 0.02 1.30"  material="parede"
+            contype="0" conaffinity="0"/>
+      <geom name="rodape_fundo"    type="box" pos="-1.595 0.0 -0.70" size="0.005 1.60 0.08" material="rodape"
+            contype="0" conaffinity="0"/>
+      <geom name="rodape_esquerda" type="box" pos="0.6 1.595 -0.70"  size="2.2 0.005 0.08" material="rodape"
+            contype="0" conaffinity="0"/>
+
+      <!-- Faixa amarela de segurança no piso, em volta da área de trabalho do robô -->
+      <geom name="faixa_frente" type="box" pos="1.15 0 -0.779"     size="0.03 0.88 0.001" material="faixa_seg"
+            contype="0" conaffinity="0"/>
+      <geom name="faixa_tras"   type="box" pos="-0.75 0 -0.779"    size="0.03 0.88 0.001" material="faixa_seg"
+            contype="0" conaffinity="0"/>
+      <geom name="faixa_esq"    type="box" pos="0.2 0.85 -0.779"   size="0.98 0.03 0.001" material="faixa_seg"
+            contype="0" conaffinity="0"/>
+      <geom name="faixa_dir"    type="box" pos="0.2 -0.85 -0.779"  size="0.98 0.03 0.001" material="faixa_seg"
+            contype="0" conaffinity="0"/>
+
+      <!-- Estante de componentes encostada na parede do fundo -->
+      <geom name="estante_col_1" type="box" pos="-1.45 -0.95 0.12" size="0.015 0.015 0.90" material="estante"
+            contype="0" conaffinity="0"/>
+      <geom name="estante_col_2" type="box" pos="-1.45 -0.05 0.12" size="0.015 0.015 0.90" material="estante"
+            contype="0" conaffinity="0"/>
+      <geom name="estante_col_3" type="box" pos="-1.25 -0.95 0.12" size="0.015 0.015 0.90" material="estante"
+            contype="0" conaffinity="0"/>
+      <geom name="estante_col_4" type="box" pos="-1.25 -0.05 0.12" size="0.015 0.015 0.90" material="estante"
+            contype="0" conaffinity="0"/>
+      <geom name="prateleira_1" type="box" pos="-1.35 -0.5 -0.55" size="0.11 0.46 0.01" material="prateleira"
+            contype="0" conaffinity="0"/>
+      <geom name="prateleira_2" type="box" pos="-1.35 -0.5 -0.05" size="0.11 0.46 0.01" material="prateleira"
+            contype="0" conaffinity="0"/>
+      <geom name="prateleira_3" type="box" pos="-1.35 -0.5 0.45"  size="0.11 0.46 0.01" material="prateleira"
+            contype="0" conaffinity="0"/>
+      <geom name="prateleira_4" type="box" pos="-1.35 -0.5 0.95"  size="0.11 0.46 0.01" material="prateleira"
+            contype="0" conaffinity="0"/>
+      <!-- Caixas organizadoras nas prateleiras -->
+      <geom name="caixa_1" type="box" pos="-1.35 -0.80 -0.47" size="0.09 0.12 0.07" material="caixa_az" contype="0" conaffinity="0"/>
+      <geom name="caixa_2" type="box" pos="-1.35 -0.52 -0.47" size="0.09 0.12 0.07" material="caixa_az" contype="0" conaffinity="0"/>
+      <geom name="caixa_3" type="box" pos="-1.35 -0.20 -0.47" size="0.09 0.14 0.07" material="caixa_pp" contype="0" conaffinity="0"/>
+      <geom name="caixa_4" type="box" pos="-1.35 -0.75 0.03"  size="0.09 0.16 0.07" material="caixa_cz" contype="0" conaffinity="0"/>
+      <geom name="caixa_5" type="box" pos="-1.35 -0.35 0.03"  size="0.09 0.16 0.07" material="caixa_az" contype="0" conaffinity="0"/>
+      <geom name="caixa_6" type="box" pos="-1.35 -0.82 0.53"  size="0.09 0.10 0.07" material="caixa_pp" contype="0" conaffinity="0"/>
+      <geom name="caixa_7" type="box" pos="-1.35 -0.58 0.53"  size="0.09 0.10 0.07" material="caixa_pp" contype="0" conaffinity="0"/>
+      <geom name="caixa_8" type="box" pos="-1.35 -0.25 0.53"  size="0.09 0.14 0.07" material="caixa_cz" contype="0" conaffinity="0"/>
+      <geom name="caixa_9" type="box" pos="-1.35 -0.60 1.03"  size="0.09 0.20 0.07" material="caixa_az" contype="0" conaffinity="0"/>
+
+      <!-- Quadro branco de processo na parede do fundo -->
+      <geom name="quadro_moldura" type="box" pos="-1.595 0.75 0.65" size="0.004 0.52 0.32" material="moldura"
+            contype="0" conaffinity="0"/>
+      <geom name="quadro"         type="box" pos="-1.59 0.75 0.65"  size="0.004 0.50 0.30" material="quadro"
+            contype="0" conaffinity="0"/>
+
+      <!-- Armário de ferramentas (vermelho) encostado na parede da esquerda -->
+      <geom name="armario"       type="box" pos="0.95 1.38 -0.30" size="0.40 0.22 0.48" material="armario"
+            contype="0" conaffinity="0"/>
+      <geom name="armario_tampo" type="box" pos="0.95 1.38 0.19"  size="0.42 0.24 0.012" material="aco"
+            contype="0" conaffinity="0"/>
+      <geom name="gaveta_1" type="box" pos="0.95 1.155 -0.05" size="0.36 0.005 0.08" material="aco" contype="0" conaffinity="0"/>
+      <geom name="gaveta_2" type="box" pos="0.95 1.155 -0.25" size="0.36 0.005 0.08" material="aco" contype="0" conaffinity="0"/>
+      <geom name="gaveta_3" type="box" pos="0.95 1.155 -0.50" size="0.36 0.005 0.14" material="aco" contype="0" conaffinity="0"/>
+
+      <!-- Placa de aviso de segurança na parede da esquerda -->
+      <geom name="placa_aviso" type="box" pos="-0.35 1.595 0.70" size="0.20 0.004 0.14" material="placa_aviso"
+            contype="0" conaffinity="0"/>
+
+      <!-- Extintor no canto entre as paredes -->
+      <geom name="extintor"       type="cylinder" pos="-1.45 1.45 -0.50" size="0.07 0.26" material="extintor"
+            contype="0" conaffinity="0"/>
+      <geom name="extintor_bico"  type="cylinder" pos="-1.45 1.45 -0.20" size="0.025 0.04" material="preto"
+            contype="0" conaffinity="0"/>
+    </body>
   </worldbody>
 </mujoco>
